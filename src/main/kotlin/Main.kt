@@ -2,7 +2,7 @@ import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
-fun main(args: Array<String>) {
+fun main() {
     val s = 42
     val numberOfShares = 6
     val minShares = 5
@@ -23,19 +23,19 @@ fun main(args: Array<String>) {
  * benötigte Anzahl [minShares] beachtet wird.
  * @return Gibt eine Map<Int, Int> zurück mit den berechneten shares als Value und der Position als Key
  */
-fun generateShares(secret: Int, numberOfShares: Int, minShares: Int): Map<Int, Double> {
+fun generateShares(secret: Int, numberOfShares: Int, minShares: Int): Map<Int, Int> {
     if (numberOfShares <= 0 || minShares <= 0 || numberOfShares < minShares) {
         throw IllegalArgumentException()
     }
 
     val random = IntArray(minShares-1) { Random.nextInt(1, 100) }
 
-    val shares = HashMap<Int, Double>()
+    val shares = HashMap<Int, Int>()
 
     for (i in 1..numberOfShares) {
-        var s = secret.toDouble()
+        var s = secret
         for (j in 1 until minShares) {
-            s += random[j-1] * (i.toDouble().pow(j))
+            s += random[j-1] * (i.toDouble().pow(j).toInt())
         }
 
         shares[i] = s
@@ -54,11 +54,12 @@ fun generateShares(secret: Int, numberOfShares: Int, minShares: Int): Map<Int, D
  * welche der Anzahl mindestens gebrauchter shares entspricht (mehr oder weniger shares führen zu falschen Ergebnissen)
  * @return Gibt das berechnete Secret zurück
  */
-fun reconstructSecret(shares: Map<Int, Double>): Int {
+fun reconstructSecret(shares: Map<Int, Int>): Int {
     val poly = DoubleArray(shares.size) { 0.0 }
     val term = DoubleArray(shares.size)
     val keys = shares.keys.toIntArray()
-    val values = shares.values.toDoubleArray()
+    val tempValues = shares.values.toIntArray()
+    val values = DoubleArray(tempValues.size) { i -> tempValues[i].toDouble() }
 
     for (i in 0 until shares.size) {
         var prod = 1.0
